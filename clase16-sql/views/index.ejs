@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/styles/styles.css" type="text/css">
+  <script src="/socket.io/socket.io.js"></script>
+  <script defer src="main.js"></script>
+  <title>SQL</title>
+</head>
+
+<body>
+  <main>
+    <h1>Formulario de Carga</h1>
+    <form id="productForm">
+      Nombre:<input name="item" id="item" autocomplete="off"><br>
+      Precio: <input name="price" id="price" autocomplete="off"><br>
+      Foto:<input name="url" id="url" autocomplete="off"><br>
+
+      <button type="submit">Guardar</button>
+    </form>
+
+    <div id="products"></div>
+
+    <h1>Chat</h1>
+    
+    <form id="formChat">
+      Mail:<input name="username" id="mail"><br>
+      Mensaje: <input name="text" id="text">
+      <button type="submit">Enviar</button>
+    </form>
+    <div class="messages" id="mensajes"></div>
+
+  </main>
+</body>
+<script>
+  const socket = io.connect();
+  //mensajes
+  const render = (data) => {
+    const html = data.map((e) => {
+      return (`
+        <div>
+        <strong style="color:blue">${e.mail}</strong>
+        <text style="color:brown">[${e.fecha}]:</text>
+        <em style="color:green">${e.text}</em>
+        </div>
+        `)
+    }).join(` `);
+    document.getElementById(`mensajes`).innerHTML = html
+  }
+
+  const addMsg = () => {
+    let fecha = new Date().toLocaleDateString()
+    let hora = new Date().toLocaleTimeString()
+    const msg = {
+      mail: document.getElementById("mail").value,
+      text: document.getElementById("text").value,
+      fecha: fecha + " " + hora,
+    };
+    socket.emit("new-message", msg);
+  };
+
+  const element = document.getElementById("formChat");
+
+  element.addEventListener("submit", (event) => {
+    event.preventDefault();
+    addMsg();
+  });
+
+  socket.on("mensajes", (data) => {
+    render(data);
+  });
+
+  //productos
+
+  socket.on('mostrar', () => {
+    fetch('/productos')
+      .then(response => response.text())
+      .then(html => {
+        const div = document.getElementById("products")
+        div.innerHTML = html
+      })
+      .catch(e => alert(e))
+  })
+
+
+  const addProd = (event) => {
+    const item = document.getElementById("item").value;
+    const price = document.getElementById("price").value;
+    const url = document.getElementById("url").value;
+    socket.emit("agregar", {
+      item,
+      price,
+      url
+    })
+  }
+
+
+  const products = document.getElementById("productForm")
+
+  products.addEventListener("submit", (event) => {
+    event.preventDefault();
+    addProd();
+  })
+</script>
+
+</html>

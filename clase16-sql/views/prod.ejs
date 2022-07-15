@@ -1,0 +1,19 @@
+<h1>Lista de productos</h1>
+<table>
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Precio</th>
+            <th>Foto</th>
+        </tr>
+    </thead>
+    <tbody>
+        <%products.forEach(e=>{%>
+        <tr>
+            <td><%=e.item%></td>
+            <td><%=e.price%></td>
+            <td><img src="<%=e.url%>" alt="" height="40" width="100"></td>
+        </tr>
+        <%})%>
+    </tbody>
+</table>

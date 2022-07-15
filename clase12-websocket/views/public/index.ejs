@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="/socket.io/socket.io.js"></script>
+    
+</head>
+<body>
+    <h1>Formulario de Carga</h1>
+    <form accion="/prod" method="post">
+        Nombre:<input name="name"><br>
+        Precio: <input name="price"><br>
+        Foto:<input name="pic"><br>
+
+        <button type="submit">Guardar</button>
+    </form>
+    <br>
+    <h2>Productos</h2>
+    <% if(prod.length==0){%>
+        Sin productos
+    <%} else{%>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Precio</th>
+                    <th>Foto</th>
+                </tr>
+            </thead>
+            <tbody>
+                <%prod.forEach(e=>{%>
+                    <tr>
+                        <td><%=e.name%></td>
+                        <td><%=e.price%></td>
+                        <td><%=e.pic%></td>
+                    </tr>
+                <%})%>
+            </tbody>
+        </table>
+
+    <%}%>
+
+
+    <h2>Centro de Mensajes</h2>
+    
+    <form id="form">
+        Mail:<input name="name" id="mail"><br>
+        <div id="chat"></div>
+        Mensaje: <input name="text" id="text">
+
+        <button type="submit">Enviar</button>
+    </form>
+
+    <script>
+        const socket=io.connect();
+//mensajes
+const render=(data)=>{
+    const html=data.map((e)=>{
+        return(`
+        <div>
+        <strong style="color:blue">${e.mail}</strong>
+        <text style="color:brown">[${e.fecha}]:</text>
+        <em style="color:green">${e.text}</em>
+        </div>
+        `)
+    }).join(` `);
+    document.getElementById(`chat`).innerHTML=html
+}
+
+socket.on(`message`,(data)=>{
+    render(data)
+})
+
+const add=()=>{
+    let fecha=new Date().toLocaleDateString()
+    let hora= new Date().toLocaleTimeString()
+    const message={
+        mail:document.getElementById(`mail`).value,
+        text:document.getElementById(`text`).value,
+        fecha:fecha+" "+hora,
+    };
+    socket.emit(`new-msg`, message);
+    return false;
+}
+
+
+const form=document.getElementById(`form`)
+form.addEventListener(`submit`, (e)=>{
+    e.preventDefault();
+    add();
+})
+    </script>
+</body>
+</html>

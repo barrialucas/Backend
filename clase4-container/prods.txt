@@ -1,0 +1,26 @@
+[
+	{
+		"product": "procesador",
+		"price": 34345,
+		"thumbnail": "",
+		"id": 1
+	},
+	{
+		"product": "placa de video",
+		"price": 60800,
+		"thumbnail": "",
+		"id": 2
+	},
+	{
+		"product": "memoria ram",
+		"price": 14500,
+		"thumbnail": "",
+		"id": 3
+	}
+]	{
+		"product": "fuente",
+		"price": 23049,
+		"thumbnail": "",
+		"id": 4
+	}
+]
