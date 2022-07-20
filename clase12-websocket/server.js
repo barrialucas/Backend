@@ -39,5 +39,5 @@ io.on(`connection`, (socket)=>{
 
 
 httpServer.listen(3000, ()=>{
-    console.log("Servidor escuchando...")
+    console.log("SV ON")
 })
