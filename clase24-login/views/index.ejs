@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/normalizr@3.6.1/dist/normalizr.browser.min.js"></script>
+  <title>Chat</title>
+</head>
+
+<body>
+  <main>
+    <h2>Bienvenido <%=user%></h2>
+    <a href="logout">Logout</a>
+    <h1>Chat</h1>
+
+    <form id="formChat">
+      Nombre:<input name="name" id="name"><br>
+      Edad:<input name="edad" id="age"><br>
+      Avatar:<input name="avatar" id="avatar"><br>
+      Email:<input name="email" id="mail"><br>
+      Mensaje: <input name="text" id="text">
+      <br><button type="submit">Enviar</button>
+    </form>
+
+    <div class="messages" id="mensajes"></div>
+
+  </main>
+</body>
+<script>
+  const socket = io.connect();
+  const denormalize = normalizr.denormalize;
+  const schema = normalizr.schema;
+
+
+  const schemaAuthor = new schema.Entity(
+    "author", {}, {
+      idAttribute: "mail",
+    }
+  );
+  const schemaMessage = new schema.Entity(
+    "message", {
+      schemaAuthor,
+    }, {
+      idAttribute: "id",
+    }
+  );
+  const schemaAllMsg = new schema.Entity(
+    "allMessages", {
+      messages: [schemaMessage],
+    }, {
+      idAttribute: "id",
+    }
+  );
+
+
+
+  socket.on("messages", (data) => {
+    const denormalizedData = denormalize(
+      data.result,
+      schemaAllMsg,
+      data.entities
+    )
+    console.log(denormalizedData);
+  });
+
+
+
+  const addMsg = () => {
+    let fecha = new Date().toLocaleDateString()
+    let hora = new Date().toLocaleTimeString()
+    const message = {
+      author: {
+        name: document.getElementById("name").value,
+        age: document.getElementById("age").value,
+        avatar: document.getElementById("avatar").value,
+        mail: document.getElementById("mail").value,
+      },
+      msg: {
+        text: document.getElementById("text").value,
+        date: fecha + " " + hora,
+      }
+
+    };
+    socket.emit("new-message", message);
+  };
+
+  const element = document.getElementById("formChat");
+  element.addEventListener("submit", (event) => {
+    event.preventDefault();
+    addMsg();
+  });
+</script>
+
+</html>
