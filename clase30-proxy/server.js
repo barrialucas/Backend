@@ -11,6 +11,7 @@ const mongoose=require("mongoose")
 const LocalStrategy= require("passport-local").Strategy
 const bcryptjs=require("bcryptjs")
 
+
 const routes = require('./routes')
 
 //user model
@@ -19,6 +20,8 @@ const Users=require("./models/users")
 const app = express()
 const httpServer = http.createServer(app)
 const io = new Server(httpServer)
+const server = require('http').Server(app);
+const argv = require('./yargs');
 //middlewares
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
@@ -189,8 +192,34 @@ mongoose
   .then(console.log('Mongo Connect!'))
   .catch((error)=>console.error(error))
 
+
+const startServer =() => {
+  server.listen(puerto, () => {
+      console.log(`Escuchando port: ${server.address().port} en proceso ID:(${process.pid})`); 
+  });
+
+  server.on('error', (err) => console.log(err));
+}
+
+const puerto = argv.port ? argv.port : argv._.length > 0 ? argv._[0] : 3000
+const modo = argv.modo || 'fork';
+
+if (modo !== 'fork'){
+  if (cluster.isPrimary) {
+      console.log(`Proceso principal ID:(${process.pid})`)
+      for(let i = 0; i <  core.cpus().length; i++) {
+          cluster.fork();
+      }
   
-const PORT=process.env.PORT||3000 
-httpServer.listen(PORT,()=>{
-  console.log("Server on: "+PORT);
-})
+      cluster.on('exit', (worker) => {
+          cluster.fork();
+      });
+  
+  } else {
+      startServer();
+  }
+} else {
+  startServer();
+}
+
+

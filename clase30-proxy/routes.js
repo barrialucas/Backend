@@ -58,15 +58,6 @@ function info(req, res) {
 }
 
 //random
-const { fork } = require('child_process');
-function random(req, res) {
-  const { cant = Math.pow(10, 8) } = req.query;
-  
-  const child = fork('./random.js', [Number(cant)]);
-  child.send( cant );
-  child.on('message', numbers => {
-    return res.json({numbers})
-  })
-}
 
-module.exports = {random,info,getRoot,getLogin,postLogin,getSignup,postSignup,getLogout,loginError,signupError}
+
+module.exports = {info,getRoot,getLogin,postLogin,getSignup,postSignup,getLogout,loginError,signupError}
